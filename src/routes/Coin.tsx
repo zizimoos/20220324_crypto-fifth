@@ -1,8 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import {
+  Route,
+  Routes,
+  useLocation,
+  useParams,
+  useMatch,
+} from "react-router-dom";
 import { FiLoader } from "react-icons/fi";
 import { IPrice, IInfo } from "./interface";
+import Chart from "./Chart";
+import Info from "./Info";
 import styled, { keyframes } from "styled-components";
+import { Link } from "react-router-dom";
 
 const Container = styled.div`
   width: 100vw;
@@ -67,6 +76,28 @@ const Description = styled.p`
   margin: 20px 0px;
 `;
 
+const Tabs = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  margin: 25px 0px;
+  gap: 10px;
+`;
+
+const Tab = styled.span<{ isActive: boolean }>`
+  text-align: center;
+  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 400;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 7px 0px;
+  border-radius: 10px;
+  a {
+    color: ${(props) =>
+      props.isActive ? "white" : props.theme.colors.textColor_02};
+    display: block;
+  }
+`;
+
 function Coin() {
   const { coinId } = useParams();
   // eslint-disable-next-line
@@ -75,6 +106,8 @@ function Coin() {
   const [info, setInfo] = useState<IInfo>();
   const [price, setPrice] = useState<IPrice>();
   const [isLoading, setIsLoading] = useState(true);
+  const chartMatch = useMatch("/:coinId/chart");
+  const infoMatch = useMatch("/:coinId/info");
 
   useEffect(() => {
     fetch(`https://api.coinpaprika.com/v1/coins/${coinId}`)
@@ -127,6 +160,20 @@ function Coin() {
               <span>{price?.max_supply}</span>
             </OverviewItem>
           </Overview>
+
+          <Tabs>
+            <Tab isActive={chartMatch !== null}>
+              <Link to={`/${coinId}/chart`}>Chart</Link>
+            </Tab>
+            <Tab isActive={infoMatch !== null}>
+              <Link to={`/${coinId}/info`}>Info</Link>
+            </Tab>
+          </Tabs>
+
+          <Routes>
+            <Route path="chart" element={<Chart />} />
+            <Route path="info" element={<Info />} />
+          </Routes>
         </ContentBox>
       )}
     </Container>
