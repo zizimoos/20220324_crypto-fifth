@@ -1,7 +1,7 @@
-import React from "react";
 import Router from "./Router";
 import { createGlobalStyle, ThemeProvider } from "styled-components";
-import { lightTheme, darkTheme } from "./them";
+// eslint-disable-next-line
+import { lightTheme, darkTheme } from "./theme";
 
 const GlobalStyle = createGlobalStyle`
 *{
@@ -13,6 +13,7 @@ const GlobalStyle = createGlobalStyle`
 }
 a {
   text-decoration: none;
+  
 }
 body {
   font-family: 'Montserrat', sans-serif;

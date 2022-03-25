@@ -9,6 +9,7 @@ declare module "styled-components" {
       bgColor_02: string;
       textColor_01: string;
       textColor_02: string;
+      hoverColor: string;
     };
   }
 }
