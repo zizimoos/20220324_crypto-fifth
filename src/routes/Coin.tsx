@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from "react";
 import {
   Route,
   Routes,
@@ -12,6 +11,9 @@ import Chart from "./Chart";
 import Info from "./Info";
 import styled, { keyframes } from "styled-components";
 import { Link } from "react-router-dom";
+import { useQuery } from "react-query";
+import { fetchInfo, fetchPrice } from "../Api";
+import { Helmet } from "react-helmet-async";
 
 const Container = styled.div`
   width: 100vw;
@@ -75,14 +77,12 @@ const OverviewItem = styled.div`
 const Description = styled.p`
   margin: 20px 0px;
 `;
-
 const Tabs = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   margin: 25px 0px;
   gap: 10px;
 `;
-
 const Tab = styled.span<{ isActive: boolean }>`
   text-align: center;
   text-transform: uppercase;
@@ -103,29 +103,25 @@ function Coin() {
   // eslint-disable-next-line
   const location = useLocation();
 
-  const [info, setInfo] = useState<IInfo>();
-  const [price, setPrice] = useState<IPrice>();
-  const [isLoading, setIsLoading] = useState(true);
   const chartMatch = useMatch("/:coinId/chart");
   const infoMatch = useMatch("/:coinId/info");
 
-  useEffect(() => {
-    fetch(`https://api.coinpaprika.com/v1/coins/${coinId}`)
-      .then((res) => res.json())
-      .then((info) => {
-        setInfo(info);
-        setIsLoading(false);
-      });
-    fetch(`https://api.coinpaprika.com/v1/tickers/${coinId}`)
-      .then((res) => res.json())
-      .then((price) => {
-        setPrice(price);
-        setIsLoading(false);
-      });
-  }, [coinId]);
+  const { isLoading: infoLoading, data: info } = useQuery<IInfo>(["info"], () =>
+    fetchInfo(coinId!)
+  );
+  const { isLoading: priceLoading, data: price } = useQuery<IPrice>(
+    ["price"],
+    () => fetchPrice(coinId!),
+    { refetchInterval: 1000 }
+  );
+
+  let isLoading = infoLoading || priceLoading;
 
   return (
     <Container>
+      <Helmet>
+        <title>{`${coinId} | Coin`}</title>
+      </Helmet>
       <Header>
         <Title>{info?.name}</Title>
       </Header>
@@ -145,8 +141,8 @@ function Coin() {
               <span>${info?.symbol}</span>
             </OverviewItem>
             <OverviewItem>
-              <span>Open Source:</span>
-              <span>{info?.open_source ? "Yes" : "No"}</span>
+              <span>Price:</span>
+              <span>${price?.quotes.USD.price.toFixed(6)}</span>
             </OverviewItem>
           </Overview>
           <Description>{info?.description}</Description>
@@ -171,7 +167,7 @@ function Coin() {
           </Tabs>
 
           <Routes>
-            <Route path="chart" element={<Chart />} />
+            <Route path="chart" element={<Chart coinId={coinId!} />} />
             <Route path="info" element={<Info />} />
           </Routes>
         </ContentBox>

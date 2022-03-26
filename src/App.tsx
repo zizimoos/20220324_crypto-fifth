@@ -2,6 +2,7 @@ import Router from "./Router";
 import { createGlobalStyle, ThemeProvider } from "styled-components";
 // eslint-disable-next-line
 import { lightTheme, darkTheme } from "./theme";
+import { HelmetProvider } from "react-helmet-async";
 
 const GlobalStyle = createGlobalStyle`
 *{
@@ -28,7 +29,9 @@ function App() {
     <>
       <ThemeProvider theme={darkTheme}>
         <GlobalStyle />
-        <Router />
+        <HelmetProvider>
+          <Router />
+        </HelmetProvider>
       </ThemeProvider>
     </>
   );

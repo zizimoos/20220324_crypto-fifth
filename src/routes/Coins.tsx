@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FiLoader } from "react-icons/fi";
 import styled, { keyframes } from "styled-components";
+import { useQuery } from "react-query";
+import { fetchCoins } from "../Api";
 
 const Container = styled.div`
   width: 100vw;
@@ -14,13 +15,14 @@ const Container = styled.div`
 `;
 const Header = styled.header`
   width: 100vw;
-  height: 10vh;
+  height: 100px;
   display: flex;
   justify-content: center;
   align-items: center;
 `;
 const Title = styled.h1`
   color: ${(props) => props.theme.colors.textColor_02};
+  color: white;
 `;
 const rotateLoader = keyframes` {
   from {
@@ -61,7 +63,7 @@ const Coin = styled.div`
   }
 `;
 
-interface CoinInterface {
+interface ICoins {
   id: string;
   name: string;
   symbol: string;
@@ -72,15 +74,7 @@ interface CoinInterface {
 }
 
 function Coins() {
-  const [coins, setCoins] = useState<CoinInterface[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    fetch("https://api.coinpaprika.com/v1/coins")
-      .then((res) => res.json())
-      .then((data) => setCoins(data.slice(0, 10)));
-    setIsLoading(false);
-  }, []);
+  const { isLoading, data: coins } = useQuery<ICoins[]>("allcoins", fetchCoins);
 
   return (
     <Container>
@@ -93,9 +87,9 @@ function Coins() {
         </LoaderBox>
       ) : (
         <CoinList>
-          {coins.map((coin, index) => (
+          {coins?.slice(0, 20).map((coin) => (
             <Coin key={coin.id}>
-              <Link to={`/${coin.id}`} state={{ name: coin.name }}>
+              <Link to={`/${coin.id}/chart`} state={{ name: coin.name }}>
                 {/* <img
                   src={`https://cryptoicon-api.vercel.app/api/icon/${coin.symbol.toLowerCase()}`}
                   alt={coin.symbol}
